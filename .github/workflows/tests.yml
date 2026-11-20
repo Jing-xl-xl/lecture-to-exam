@@ -1,0 +1,29 @@
+name: offline tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install optional deps (tests SKIP cleanly without them)
+        run: |
+          python -m pip install --upgrade pip
+          pip install markdown pymupdf || true
+
+      - name: Run offline test suite
+        run: python tests/run_tests.py
+
+      - name: Verify the shipped examples pass the format gate
+        run: |
+          python scripts/run.py verify_output tests/fixtures/sample_review_text_only.md --mode b
+          python scripts/run.py verify_output tests/fixtures/sample_knowledge_with_figures.md --mode a --slides 2

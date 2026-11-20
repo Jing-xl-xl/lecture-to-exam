@@ -1,0 +1,12 @@
+{
+  "name": "lecture-to-exam-pdf-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node-side PDF rendering dependency for the lecture-to-exam WorkBuddy skill",
+  "dependencies": {
+    "playwright": "1.62.0"
+  },
+  "scripts": {
+    "install-browser": "npx playwright install chromium"
+  }
+}
