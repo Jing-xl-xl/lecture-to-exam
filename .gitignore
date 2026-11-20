@@ -31,6 +31,11 @@ venv/
 # Intermediate drafts written by the workflow
 work/
 
+# Skill output directories (a real run writes course material here)
+lecture_notes/
+review/
+transcripts/
+
 # Local run artifacts (real course material — never publish)
 out/
 dist/

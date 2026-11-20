@@ -32,6 +32,9 @@ import tempfile
 import subprocess
 from urllib.parse import urlparse
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
+
 CURL = shutil.which("curl") or "curl"
 
 
@@ -59,7 +62,7 @@ def fetch(url, out, domain, referer, workdir=None):
     info = os.path.join(rundir, "playinfo.json")
     tmp_mp4 = os.path.join(rundir, "video.mp4")
     try:
-        print(f"fetching share page: {url}", file=sys.stderr)
+        print(f"fetching share page: {_common.redact_url(url)}", file=sys.stderr)
         run([CURL, "-sL", "--max-time", "40", "-c", cookie, url, "-o", page])
         html = open(page, encoding="utf-8", errors="ignore").read()
         m = re.search(r"/nws/recording/2\.0/share/([0-9A-Fa-f-]+)", html)

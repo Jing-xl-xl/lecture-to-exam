@@ -36,6 +36,9 @@ import argparse
 import subprocess
 from urllib.parse import urlparse
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _common  # noqa: E402
+
 CURL = shutil.which("curl") or "curl"
 
 
@@ -179,7 +182,7 @@ def write_transcript(path, source_name, source, segments, language=None):
 
 
 def fetch(url, out, domain, referer, with_speaker):
-    print(f"fetching share page: {url}", file=sys.stderr)
+    print(f"fetching share page: {_common.redact_url(url)}", file=sys.stderr)
     html = curl_get(url, referer)
     fc_path = find_feature_config_api(html)
     if not fc_path:

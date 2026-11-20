@@ -140,7 +140,15 @@ async function main() {
   const pdfPath = process.argv[3] || path.join(process.cwd(), path.basename(absHtml, ".html") + ".pdf");
 
   const browser = await launchBrowser();
-  const page = await browser.newPage();
+  // Printing never needs scripts, and a Markdown file can carry raw HTML.
+  // Run with JS off and only allow local resources, so converting someone
+  // else's .md cannot execute code or phone home from this machine.
+  const page = await browser.newPage({ javaScriptEnabled: false });
+  await page.route("**/*", (route) => {
+    const url = route.request().url();
+    if (url.startsWith("file:") || url.startsWith("data:")) return route.continue();
+    return route.abort();
+  });
 
   const failed = [];
   page.on("requestfailed", (req) => {

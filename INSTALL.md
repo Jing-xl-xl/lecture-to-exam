@@ -147,7 +147,8 @@ python3 <skill>/scripts/run.py zoom_transcript "<链接>" -o "_转录稿.md" \
 
 1. `render_pptx_pages` 已内置独立临时 profile，多数情况直接可用。
 2. `--lo-app "/path/to/LibreOffice.app"` 指向健康副本（macOS）。
-3. `--dmg "/path/to/LibreOffice.dmg"` 挂载干净副本（**仅 macOS**）。
+3. `--dmg "/path/to/LibreOffice.dmg"` 挂载干净副本（**仅 macOS**）——注意这条会用
+   `hdiutil` 挂载并去掉隔离标记后**执行**其中的 LibreOffice，**只挂载你信任的 DMG**。
 4. 最省事：自己把 PPTX 导出成 PDF，交给 `extract_pdf`。
 
 ### 5. Playwright 浏览器版本不匹配

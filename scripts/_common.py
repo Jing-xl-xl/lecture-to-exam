@@ -8,6 +8,7 @@ location, or a conventional location for the current platform.
 No third-party imports: this module must import cleanly under any Python 3.8+.
 """
 import os
+import re
 import sys
 import json
 import shutil
@@ -295,3 +296,13 @@ def cached_chromium_binaries(max_depth=4):
                 if name in CHROMIUM_BIN_NAMES:
                     found.append(os.path.join(dirpath, name))
     return found
+
+
+def redact_url(url):
+    """Hide the access token in a Zoom share URL before writing it to a log.
+
+    A /rec/share/<token> link IS a credential: anyone holding it can watch the
+    recording without signing in. Keep the host and path so the line is still
+    useful, drop the token.
+    """
+    return re.sub(r"(/rec/(?:share|play)/)[^/?#\s]+", r"\1<redacted>", url or "")
