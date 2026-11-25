@@ -1,7 +1,7 @@
 # lecture-to-exam
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/offline%20tests-32%20passing-brightgreen.svg)](tests/run_tests.py)
+[![offline tests](https://github.com/Jing-xl-xl/lecture-to-exam/actions/workflows/tests.yml/badge.svg)](https://github.com/Jing-xl-xl/lecture-to-exam/actions/workflows/tests.yml)
 
 **把课程录音 + 讲义，变成可直接用于期末开卷考试的复习资料。**
 
@@ -74,7 +74,7 @@
 | L6 讲义（入侵检测） | 42 个知识点 · 43 张原图 · 51 页 PDF | 11/11 闸门通过 |
 | 期末复习手册（2 讲） | 11 部分 · 40 个考点 · 7 道真题解析 · 33 页 | 8/8 闸门通过 |
 | 幻灯片原图 | 91 张（130 dpi，逐页渲染） | 44 + 47 页全部对齐 |
-| 离线测试 | 32 项 | 32 passed / 0 failed / 0 skipped |
+| 离线测试 | 35 项 | 35 passed / 0 failed / 0 skipped |
 
 其中 4 道真题因超出这两讲范围，按规则留占位并汇总进「需补讲义清单」，未用常识补写。
 
@@ -208,7 +208,7 @@ Mode B 是否零图片、是否 11 部分、中文段落是否 80–200 字、�
 ### 自测
 
 ```bash
-python3 <skill>/tests/run_tests.py     # 32 项，离线；缺依赖的项自动 SKIP
+python3 <skill>/tests/run_tests.py     # 35 项，离线；缺依赖的项自动 SKIP
 ```
 
 ---
@@ -344,7 +344,7 @@ lecture-to-exam/
 │   ├── fetch_webpage_text.py    # JS 页面取正文
 │   └── …                        # 抓音、取字、出图、md→pdf
 ├── examples/                    # 离线烟雾测试样例
-├── tests/                       # 32 项离线测试（缺依赖自动 SKIP）
+├── tests/                       # 35 项离线测试（缺依赖自动 SKIP）
 │   └── run_tests.py
 ├── assets/                      # README 预览图
 └── .github/workflows/tests.yml  # CI：每次 push 跑一遍离线测试
