@@ -384,6 +384,11 @@ def test_new_tools():
                 "## 2 公式\n\n| 符号 | 含义 |\n|---|---|\n| AP | TP/(TP+FP) |\n")
     pdf = os.path.join(TMP, "cheat.pdf")
     r = run([PY, RUN, "make_cheatsheet", md, pdf])
+    combined = ((r.stdout or "") + (r.stderr or "")).lower()
+    if r.returncode != 0 and ("playwright" in combined or "chromium" in combined):
+        # No browser renderer here (e.g. CI): skip like every other PDF test.
+        report_skip("9c. make_cheatsheet produces one page", "playwright/chromium not installed")
+        return
     ok = r.returncode == 0 and os.path.exists(pdf)
     detail = (r.stdout or r.stderr).strip().splitlines()[-1] if (r.stdout or r.stderr) else ""
     report("9c. make_cheatsheet produces one page", ok, detail)
