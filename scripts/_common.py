@@ -315,10 +315,19 @@ def cached_chromium_binaries(max_depth=4):
 
 
 def redact_url(url):
-    """Hide the access token in a Zoom share URL before writing it to a log.
+    """Hide every access credential in a Zoom URL before it reaches a log.
 
-    A /rec/share/<token> link IS a credential: anyone holding it can watch the
-    recording without signing in. Keep the host and path so the line is still
-    useful, drop the token.
+    Three places can carry one:
+      * the path token          /rec/share/<token> or /rec/play/<token>
+      * originRequestUrl=<enc>  a URL-encoded *share link* (so, another token)
+      * pwd / passcode          a meeting passcode
+
+    A share link IS a credential: anyone holding it can watch the recording
+    without signing in. Keep the host and path so the line stays useful.
     """
-    return re.sub(r"(/rec/(?:share|play)/)[^/?#\s]+", r"\1<redacted>", url or "")
+    if not url:
+        return ""
+    out = re.sub(r"(/rec/(?:share|play)/)[^/?#\s&]+", r"\1<redacted>", url)
+    out = re.sub(r"(originRequestUrl=)[^&\s]+", r"\1<redacted-url>", out)
+    out = re.sub(r"([?&](?:pwd|passcode|password)=)[^&\s]+", r"\1<redacted>", out, flags=re.I)
+    return out

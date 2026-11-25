@@ -17,6 +17,7 @@ Options:
     --python PATH       Python interpreter that has pymupdf (fitz) installed
 """
 import os
+import re
 import sys
 import argparse
 import subprocess
@@ -42,6 +43,12 @@ print(json.dumps({"count": len(pages), "pages": pages}, ensure_ascii=False))
 '''
 
 
+def safe_prefix(prefix):
+    """A page prefix becomes a filename; keep it to letters/digits/_/- only."""
+    cleaned = re.sub(r"[^A-Za-z0-9_-]", "", prefix or "")
+    return cleaned or "S"
+
+
 def main():
     ap = argparse.ArgumentParser(description="Extract PDF text and render page images")
     ap.add_argument("pdf")
@@ -52,6 +59,7 @@ def main():
     ap.add_argument("--text-out")
     ap.add_argument("--python")
     args = ap.parse_args()
+    args.prefix = safe_prefix(args.prefix)
 
     if not os.path.isfile(args.pdf):
         raise SystemExit(f"ERROR: pdf not found: {args.pdf}")

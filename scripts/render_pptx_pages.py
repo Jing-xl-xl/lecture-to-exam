@@ -14,6 +14,7 @@ If neither --lo-app nor --dmg is given, `soffice` on PATH is used. Blank slides
 are still rendered; the agent decides in the Markdown whether to embed them.
 """
 import os
+import re
 import sys
 import shutil
 import argparse
@@ -80,6 +81,12 @@ def soffice_bin(lo_app, dmg, mountpoint):
         "or convert the deck to PDF and use extract_pdf.py.")
 
 
+def safe_prefix(prefix):
+    """A page prefix becomes a filename; keep it to letters/digits/_/- only."""
+    cleaned = re.sub(r"[^A-Za-z0-9_-]", "", prefix or "")
+    return cleaned or "S"
+
+
 def main():
     ap = argparse.ArgumentParser(description="Render PPTX pages to PNG")
     ap.add_argument("pptx")
@@ -90,6 +97,7 @@ def main():
     ap.add_argument("--dmg")
     ap.add_argument("--python")
     args = ap.parse_args()
+    args.prefix = safe_prefix(args.prefix)
 
     if not os.path.isfile(args.pptx):
         raise SystemExit(f"ERROR: pptx not found: {args.pptx}")

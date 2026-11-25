@@ -266,6 +266,16 @@ python3 <skill>/tests/run_tests.py     # 32 项，离线；缺依赖的项自动
 - `yt-dlp` / `ffmpeg` / `curl`：走系统已安装版本，本仓库不打包它们。
 - `extract_pdf` 用 PyMuPDF 解析 PDF，`extract_pptx` 直接解 zip：**只处理你信任的文件。**
 
+**借用浏览器登录态**：老版 `/rec/play/` 链接需要已登录的会话，`zoom_transcript_play` 会从
+你指定的浏览器读取 `*.zoom.us` 的 cookie。这些 cookie 只在内存与 0700 临时目录里，运行结束即删；
+日志里的 URL 会被脱敏（路径 token、`originRequestUrl`、`pwd` 三处都会替换）。
+**用途限定**：仅用于你本人有权观看的录制，只在你自己的机器上运行；不要把运行日志发给别人——
+分享/播放链接本身就是访问凭证。
+
+**播放器页面的第三方请求**：这条路径必须开启 JavaScript（转录由播放器加载），因此会像普通浏览器一样
+加载 Zoom 页面内嵌的第三方资源（分析脚本等），对方能看到你的 IP 与 UA。cookie 只注入 Zoom 域，
+不会带到第三方。不要把不可信的链接喂给这个工具。
+
 **Zoom 转录的边界**：`zoom_transcript.py` 读取的是 Zoom 播放器的 feature-config 接口，
 不是公开文档化的 API，可能随平台改动而失效，使用时请遵守所在机构的条款与课程规定。
 日志里的分享链接已做脱敏（`/rec/share/<redacted>`），因为分享链接本身就是访问凭证。

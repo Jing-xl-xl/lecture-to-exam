@@ -14,6 +14,7 @@ import os
 import sys
 import argparse
 import subprocess
+from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _common  # noqa: E402
@@ -28,6 +29,12 @@ def main():
     ap.add_argument("-o", "--output", default="page.txt")
     ap.add_argument("--scroll", type=int, default=8, help="scroll steps to trigger lazy content")
     args = ap.parse_args()
+
+    scheme = (urlparse(args.url).scheme or "").lower()
+    if scheme not in ("http", "https"):
+        print(f"ERROR: refusing a {scheme or 'relative'} URL; only http(s) may be fetched.",
+              file=sys.stderr)
+        return 1
 
     node = _common.resolve_node()
     if not node:

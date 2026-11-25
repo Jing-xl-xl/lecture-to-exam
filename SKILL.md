@@ -83,6 +83,10 @@ same session.
    which borrows a signed-in browser session and captures the player's VTT.
    Cookies stay in a per-run temp dir and are deleted on exit; never print them
    and never persist them.
+   **Scope of use**: borrow the session only for recordings the user is entitled
+   to watch, on the user's own machine. Do not share the resulting logs — a
+   share/play URL is itself an access credential, so `redact_url()` must wrap
+   every URL before it is printed or written.
 3. **Original slide images are mandatory in Mode A.** Every non-blank page
    becomes `figures/{prefix}_p{NN}.png`, embedded once at full size beside the
    first point that uses it, with a caption and a matching page number. If no

@@ -33,15 +33,27 @@ FAMILIES = {
 }
 
 
+MAX_UNCOMPRESSED = 200 * 1024 * 1024  # a slide deck is megabytes, never this big
+
+
 def deck_text(path):
-    """Slide text from a .pptx (zip + runs), order-insensitive for scoring."""
+    """Slide text from a .pptx (zip + runs), order-insensitive for scoring.
+
+    The size cap keeps a malicious/corrupt zip (zip bomb) from exhausting RAM.
+    """
     try:
         with zipfile.ZipFile(path) as z:
             names = [n for n in z.namelist() if re.match(r"ppt/slides/slide\d+\.xml$", n)]
             chunks = []
+            total = 0
             for n in names:
-                xml = z.read(n).decode("utf-8", "ignore")
-                chunks += re.findall(r"<a:t\b[^>]*>(.*?)</a:t>", xml, re.S)
+                raw = z.read(n)
+                total += len(raw)
+                if total > MAX_UNCOMPRESSED:
+                    print(f"WARN: {os.path.basename(path)} decompresses past the cap; "
+                          f"scoring only the first {len(chunks)} slides", file=sys.stderr)
+                    break
+                chunks += re.findall(r"<a:t\b[^>]*>(.*?)</a:t>", raw.decode("utf-8", "ignore"), re.S)
             return " ".join(chunks), len(names)
     except Exception:
         return "", 0

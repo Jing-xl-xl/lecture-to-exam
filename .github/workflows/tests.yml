@@ -20,7 +20,7 @@ jobs:
       - name: Install optional deps (tests SKIP cleanly without them)
         run: |
           python -m pip install --upgrade pip
-          pip install markdown pymupdf || true
+          pip install "markdown==3.11.3" "pymupdf==1.28.2" || pip install markdown pymupdf || true
 
       - name: Run offline test suite
         run: python tests/run_tests.py

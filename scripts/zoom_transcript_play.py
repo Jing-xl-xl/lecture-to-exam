@@ -26,6 +26,7 @@ never printed. URLs are redacted before logging.
 import os
 import sys
 import json
+import time
 import shutil
 import argparse
 import tempfile
@@ -37,6 +38,24 @@ import zoom_transcript as zt  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SNIFFER = os.path.join(HERE, "_sniff_vtt.js")
+
+
+def sweep_stale(max_age=3600):
+    """Remove leftover run dirs from a crashed or killed previous run."""
+    base = tempfile.gettempdir()
+    now = time.time()
+    try:
+        for name in os.listdir(base):
+            if not name.startswith("zoomplay_"):
+                continue
+            path = os.path.join(base, name)
+            try:
+                if now - os.path.getmtime(path) > max_age:
+                    shutil.rmtree(path, ignore_errors=True)
+            except OSError:
+                pass
+    except OSError:
+        pass
 
 
 def fail(msg, code=1):
@@ -91,6 +110,7 @@ def main():
 
     print(f"opening player with a {args.from_browser} session: {_common.redact_url(args.url)}",
           file=sys.stderr)
+    sweep_stale()
     cookies = read_cookies(args.from_browser)
     if not cookies:
         fail("ERROR: no *.zoom.us cookies found in " + args.from_browser +
@@ -102,6 +122,10 @@ def main():
     try:
         with open(cookie_file, "w", encoding="utf-8") as f:
             json.dump(cookies, f)
+        try:
+            os.chmod(cookie_file, 0o600)
+        except OSError:
+            pass  # the 0700 run dir already protects it
         proc = subprocess.run(
             [node, SNIFFER, args.url, cookie_file, result_file, str(max(5, args.wait) * 1000)],
             capture_output=True, text=True,

@@ -344,9 +344,13 @@ def test_new_tools():
     sys.path.insert(0, SCRIPTS)
     try:
         import _common
-        red = _common.redact_url("https://hku.zoom.us/rec/share/AbC-123_xyz?pwd=1")
-        ok = "<redacted>" in red and "AbC-123" not in red
-        report("9a. share token is redacted in logs", ok, red[:48])
+        full = ("https://hku.zoom.us/rec/play/PLAY_TOK?oldStyle=true"
+                "&originRequestUrl=https%3A%2F%2Fhku.zoom.us%2Frec%2Fshare%2FSHARE_TOK.u72m4"
+                "&pwd=secret9")
+        red = _common.redact_url(full)
+        ok = ("<redacted>" in red and "PLAY_TOK" not in red
+              and "SHARE_TOK" not in red and "secret9" not in red)
+        report("9a. every credential in a URL is redacted", ok, red[:64])
     except Exception as e:  # noqa: BLE001
         report("9a. share token is redacted in logs", False, str(e))
 
