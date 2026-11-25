@@ -233,7 +233,23 @@ def soffice_candidates():
         for base in (os.environ.get("ProgramFiles", r"C:\Program Files"),
                      os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")):
             cands.append(os.path.join(base, "LibreOffice", "program", "soffice.exe"))
+    if is_macos():
+        # A mounted DMG is the safest way to use a healthy copy without
+        # touching /Applications (the installed one is often broken).
+        cands += _mounted_dmg_soffice()
     return _existing(cands)
+
+
+def _mounted_dmg_soffice():
+    out = []
+    try:
+        for name in os.listdir("/Volumes"):
+            app = os.path.join("/Volumes", name, "LibreOffice.app", "Contents", "MacOS", "soffice")
+            if os.path.exists(app):
+                out.append(app)
+    except OSError:
+        pass
+    return out
 
 
 def probe_soffice(path):

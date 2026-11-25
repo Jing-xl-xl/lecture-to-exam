@@ -34,10 +34,12 @@ SERVES = {
     "yt-dlp": "A1 audio download (only when no official transcript)",
     "ffmpeg": "A1 audio download (only when no official transcript)",
     "libreoffice": "A2 PPTX original slide images",
+    "browser_cookie3": "A1 transcript for /rec/play/ links (borrow a browser session)",
 }
 
 STAGE_SETS = {
-    "transcript (A1)": ["curl"],
+    "transcript (A1, share)": ["curl"],
+    "transcript (A1, /rec/play/)": ["curl", "playwright", "chromium", "browser_cookie3"],
     "lecture notes (A2)": ["python", "curl", "markdown", "pymupdf", "libreoffice"],
     "pdf export (A3/B)": ["markdown", "playwright", "chromium"],
     "audio fallback": ["curl", "yt-dlp", "ffmpeg"],
@@ -100,6 +102,14 @@ def main():
                 else f"expected {expected} — run: npx playwright install chromium")
     else:
         add("browser", "chromium", False, "playwright unresolved, cannot verify Chromium")
+
+    # Old-style /rec/play/ links need a real browser plus a signed-in session.
+    try:
+        import browser_cookie3  # noqa: F401
+        cookie_ok, cookie_detail = True, "importable"
+    except ImportError:
+        cookie_ok, cookie_detail = False, "not installed (pip install browser_cookie3)"
+    add("conditional", "browser_cookie3", cookie_ok, cookie_detail)
 
     # LibreOffice: a binary that exists but cannot start is a failure, not a pass.
     soffice = None

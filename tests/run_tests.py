@@ -338,6 +338,53 @@ def test_run_py_portability():
     report("8d. unknown tool fails cleanly (exit 1)", r.returncode == 1 and "unknown tool" in r.stderr)
 
 
+
+def test_new_tools():
+    """v1.1 tools: URL redaction, partial-scope gate, one-page cheat sheet."""
+    sys.path.insert(0, SCRIPTS)
+    try:
+        import _common
+        red = _common.redact_url("https://hku.zoom.us/rec/share/AbC-123_xyz?pwd=1")
+        ok = "<redacted>" in red and "AbC-123" not in red
+        report("9a. share token is redacted in logs", ok, red[:48])
+    except Exception as e:  # noqa: BLE001
+        report("9a. share token is redacted in logs", False, str(e))
+
+    # partial scope: a notes file that says a deck was not taught passes the gate
+    src = os.path.join(FIX, "sample_knowledge_with_figures.md")
+    part = os.path.join(TMP, "partial.md")
+    with open(src, encoding="utf-8") as f:
+        body = f.read()
+    with open(part, "w", encoding="utf-8") as f:
+        f.write(body + "\n> 未讲：L7a / L7b 本讲未覆盖。\n")
+    work = os.path.join(TMP, "partial_fig")
+    os.makedirs(os.path.join(work, "figures"), exist_ok=True)
+    import shutil as _sh
+    _sh.copy(os.path.join(FIX, "figures", "F_p12.png"), os.path.join(work, "figures", "F_p12.png"))
+    target = os.path.join(work, "partial.md")
+    with open(part, encoding="utf-8") as f:
+        text = f.read()
+    with open(target, "w", encoding="utf-8") as f:
+        f.write(text)
+    r = run([PY, RUN, "verify_output", target, "--scope", "partial"])
+    report("9b. --scope partial accepts a not-taught note", r.returncode == 0,
+           r.stdout.strip().splitlines()[-1] if r.stdout else "")
+
+    # one-page cheat sheet
+    if not has_md() or run([PY, "-c", "import pymupdf"]).returncode != 0:
+        report_skip("9c. make_cheatsheet produces one page", "markdown/pymupdf missing")
+        return
+    md = os.path.join(TMP, "cheat.md")
+    with open(md, "w", encoding="utf-8") as f:
+        f.write("# 示例速查\n\n## 1 规则\n\n- 只带计算器\n- 无选择题\n\n"
+                "## 2 公式\n\n| 符号 | 含义 |\n|---|---|\n| AP | TP/(TP+FP) |\n")
+    pdf = os.path.join(TMP, "cheat.pdf")
+    r = run([PY, RUN, "make_cheatsheet", md, pdf])
+    ok = r.returncode == 0 and os.path.exists(pdf)
+    detail = (r.stdout or r.stderr).strip().splitlines()[-1] if (r.stdout or r.stderr) else ""
+    report("9c. make_cheatsheet produces one page", ok, detail)
+
+
 def main():
     print("lecture-to-exam small-sample tests")
     print("=" * 52)
@@ -350,6 +397,7 @@ def main():
         test_knowledge_spec_structure()
         test_review_spec_structure()
         test_run_py_portability()
+        test_new_tools()
     finally:
         shutil.rmtree(TMP, ignore_errors=True)
     print("=" * 52)

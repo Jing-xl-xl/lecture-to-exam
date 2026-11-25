@@ -16,6 +16,9 @@ Options:
     --allow-text-only   Mode A escape hatch: permit a notes file with no slide
                         images. Only after the user explicitly agreed to a
                         text-only handout.
+    --scope full|partial  partial: the page-map covers only the pages actually
+                        taught (deck supplied but not covered). Requires a
+                        "not taught" note in the file.
     --json              machine-readable result
 
 Exit codes: 0 all checks pass, 1 violations found, 2 usage/input error.
@@ -103,8 +106,12 @@ def verify_mode_a(path, text, checks, args):
                    if not os.path.isfile(os.path.join(root, p))]
         check(checks, "A9 every page-map image path exists", not bad_map,
               "ok" if not bad_map else f"missing {bad_map[:5]}")
-        if args.slides:
-            check(checks, f"A10 page-map row count == {args.slides} supplied slides",
+        if args.scope == "partial":
+            mentions = ("未讲" in text) or ("not taught" in text.lower()) or ("未覆盖" in text)
+            check(checks, "A10 partial scope documents which decks were not taught",
+                  mentions, "ok" if mentions else "add a '未讲 / not taught' note in §2")
+        if args.slides and args.scope == "full":
+            check(checks, f"A11 page-map row count == {args.slides} supplied slides",
                   len(rows) == args.slides, f"{len(rows)} row(s)")
 
 
@@ -164,6 +171,7 @@ def main():
     ap.add_argument("--slides", type=int, default=0)
     ap.add_argument("--figures-dir", default=None)
     ap.add_argument("--allow-text-only", action="store_true")
+    ap.add_argument("--scope", choices=("full", "partial"), default="full")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 

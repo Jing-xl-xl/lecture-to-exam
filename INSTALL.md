@@ -101,6 +101,17 @@ python3 <skill>/scripts/run.py html_to_pdf /tmp/demo.html /tmp/demo.pdf
 
 ---
 
+## 二·补、macOS 专项
+
+- `/opt/homebrew` 或 `~/.npm` 属主不是你就先 `sudo chown -R $(whoami) <dir>`，否则 brew/npm 都会报错。
+- `npm install` 若因缓存权限失败：`npm install --cache /tmp/npm-cache`。
+- macOS 没有 `timeout` 命令，别在脚本里用。
+- LibreOffice 建议用 DMG：`hdiutil attach LibreOffice.dmg`，再把
+  `--lo-app /Volumes/LibreOffice/LibreOffice.app` 传给 `render_pptx_pages`，不动系统目录。
+- 课程材料别放 iCloud（会同步上云），放 `~/Courses` 这类本地目录。
+- 老版 `/rec/play/` 链接取转录需要"浏览器已登录该 Zoom 租户"，并装
+  `browser_cookie3`：`pip install browser_cookie3`。
+
 ## 三、环境变量
 
 | 变量 | 作用 |
@@ -115,6 +126,14 @@ python3 <skill>/scripts/run.py html_to_pdf /tmp/demo.html /tmp/demo.pdf
 ---
 
 ## 四、排障
+
+### 0. 报 `no feature-config API found`
+
+Zoom 已改版：`/rec/share/` 与 `/rec/play/` 都变成前端渲染，页面里不再内嵌配置。
+
+- `/rec/play/` 链接：`zoom_transcript` 会自动转给 `zoom_transcript_play`（需要浏览器登录态）。
+- `/rec/share/` 链接：同样改用 `zoom_transcript_play`，或先在浏览器打开确认可播放后再试。
+- 需要 `pip install browser_cookie3`，并在 Chrome 里登录该租户。
 
 ### 1. `NO_TRANSCRIPT`
 

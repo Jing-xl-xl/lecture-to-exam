@@ -226,6 +226,14 @@ def fetch(url, out, domain, referer, with_speaker):
     return {"out": out, "topic": topic, "segments": n, "source": source}
 
 
+def delegate_to_play(url, out):
+    """Old-style /rec/play/ links need a browser; hand over to the play fetcher."""
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "zoom_transcript_play.py")
+    print("detected /rec/play/ link — delegating to zoom_transcript_play.py",
+          file=sys.stderr)
+    return subprocess.call([sys.executable, script, url, "-o", out])
+
+
 def main():
     ap = argparse.ArgumentParser(description="Fetch Zoom's official cloud transcript")
     ap.add_argument("url")
@@ -234,6 +242,9 @@ def main():
     ap.add_argument("--referer", default=None)
     ap.add_argument("--with-speaker", action="store_true", help="Prefix each line with speaker name")
     args = ap.parse_args()
+
+    if "/rec/play/" in args.url:
+        return delegate_to_play(args.url, args.output)
 
     host = urlparse(args.url).netloc or ""
     domain = args.domain or host

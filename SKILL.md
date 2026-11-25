@@ -58,7 +58,9 @@ same session.
 | Official transcript + slides already supplied → knowledge summary | A (skip A1) |
 | "根据所有 lecture 生成复习大纲 / 期末复习手册 / 考点总结" | B |
 | Existing lecture `.md` → PDF only | A, stage A3 only |
+| An existing outline / mind map must be **completed** | C (`references/mode-c.md`) |
 | Fewer than 2 lectures for a "review" request | B guard → ask for more |
+| Zoom link is old-style `/rec/play/` | A1 via `zoom_transcript_play` (browser session + VTT) |
 | Zoom link has no official transcript | A1 stops after audio download; ask the user for a transcript |
 | PPTX supplied but no working LibreOffice | A2 stops; offer the three outs in `references/mode-a.md` |
 
@@ -76,6 +78,11 @@ same session.
    → access problem (password, expiry, SSO, network), **not** a missing
    transcript; fix access first. Never transcribe locally, never recommend a
    specific transcription tool.
+   For an old-style `/rec/play/` link, or when the share page no longer embeds
+   the player config, `zoom_transcript` hands over to `zoom_transcript_play`,
+   which borrows a signed-in browser session and captures the player's VTT.
+   Cookies stay in a per-run temp dir and are deleted on exit; never print them
+   and never persist them.
 3. **Original slide images are mandatory in Mode A.** Every non-blank page
    becomes `figures/{prefix}_p{NN}.png`, embedded once at full size beside the
    first point that uses it, with a caption and a matching page number. If no
@@ -151,12 +158,19 @@ handout.
 | `references/transcript-spec.md` | validating or requesting a transcript |
 | `references/knowledge-spec.md` | writing the Mode A `.md` |
 | `references/review-spec.md` | writing the Mode B handbook |
+| `references/mode-c.md` | completing an existing outline / mind map |
+| `references/device-setup.md` | reproducing the author's environment |
 
 | Tool | Purpose |
 |---|---|
 | `check_env` | read-only dependency check (`--json` for machines) |
 | `verify_output` | the gate above |
-| `zoom_transcript` / `zoom_fetch` / `zoom_fetch_share` | official transcript; audio-only fallback |
+| `zoom_transcript` | share links: official cloud transcript (curl only) |
+| `zoom_transcript_play` | `/rec/play/` links: browser session + player VTT |
+| `zoom_fetch` / `zoom_fetch_share` | audio-only fallback |
+| `match_decks` | suggest which decks a recording actually taught |
+| `make_cheatsheet` | markdown → one-page A4 revision sheet |
+| `fetch_webpage_text` | render a JS page and dump its visible text |
 | `extract_pdf` / `extract_pptx` / `render_pptx_pages` | source text and original page images |
 | `validate_review_input` | enforces ≥ 2 lectures |
 | `md_to_html` / `html_to_pdf` | Markdown → HTML → self-contained PDF |

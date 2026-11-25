@@ -216,7 +216,12 @@ Rules:
   full item), 🟠 required/operational (expanded), 🟢 supporting (condensed to a
   brief note but still cited).
 - `Treatment` says `Expanded` (full per-item coverage exists), `Brief`
-  (condensed to a short note), or `Skip (blank)` (empty slide, listed only).
+  (condensed to a short note), `Skip (blank)` (empty slide, listed only), or
+  `Not taught` (deck supplied but this recording did not cover it).
+- **Supplied but not covered.** When several decks are handed over and the
+  recording only teaches some, list every unused deck in §2 with a one-line
+  reason, and do not invent page rows for it. Run the gate with
+  `--scope partial`, which requires that "not taught" note to exist.
 - `Image` is the exact relative path `figures/{prefix}_p{NN}.png` when a non-blank
   page was rendered and embedded, or `— (blank)` for a skipped blank slide.
   A non-blank row with no image path is a coverage failure — stop and render it.

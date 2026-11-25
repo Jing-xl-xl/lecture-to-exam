@@ -273,7 +273,40 @@ python3 <skill>/tests/run_tests.py     # 32 项，离线；缺依赖的项自动
 **不要提交真实材料**：`.gitignore` 默认忽略 `lecture_notes/`、`review/`、`transcripts/`、
 `out/`、`figures/` 与所有 `*.pdf`。样例与测试数据全部是合成的假数据。
 
-## 8. 目录结构与许可
+## 8. 实测环境（可 1:1 复现）
+
+| 项目 | 实测值 | 说明 |
+|---|---|---|
+| 机器 | Apple Silicon（arm64） | Intel 需把 Chromium 路径里的 mac-arm64 换成 mac-x64 |
+| 系统 | macOS 26.6.2（build 25G83） | |
+| Python | 3.15.2（Homebrew） | **系统 Python 不带 markdown / pymupdf**，需 venv 或 pip 装 |
+| Node | v22.23.4（nvm） | |
+| Playwright | 1.65.0-alpha-2026-10-30（npx 缓存） | 与缓存 Chromium 版本常不一致，见 §9 |
+| Chromium | 缓存 1234 / 1254 | 该 Playwright 期望 1252，缺失 → 自动回退 |
+| LibreOffice | 25.8.7.3，**DMG 挂载** `/Volumes/LibreOffice` | `/Applications` 那份启动即崩（DeploymentException） |
+| 浏览器 | Chrome 158.0.8127.37，已登录课程 Zoom 租户 | `/rec/play/` 链接取转录依赖它 |
+| 工作目录 | iCloud Drive | 大文件会上云，介意就移出 iCloud |
+
+**这台机器上的四个坑（都已绕过）**
+
+1. `brew install` 失败：`/opt/homebrew` 属主是 root → `sudo chown -R $(whoami) /opt/homebrew`。
+2. `npm install` 失败：`~/.npm` 属主是 root → 用 `npm install --cache /tmp/npm-cache`。
+3. macOS 没有 `timeout` 命令 → 脚本里不要用，改用后台任务或 Playwright 自带超时。
+4. 往工作区外写文件会被沙盒拒绝 → 先在工作区内生成，再一次性复制并授权。
+
+完整清单与复现步骤见 [`references/device-setup.md`](references/device-setup.md)。
+
+## 9. 已知问题（2026-11 实测）
+
+| 症状 | 原因 | 处理 |
+|---|---|---|
+| `zoom_transcript` 报 `no feature-config API found` | Zoom 已把 `/rec/share/` 改成前端渲染，配置不再内嵌 | 用 `zoom_transcript_play`（需浏览器登录态）；`/rec/play/` 链接会自动分流 |
+| 打开页面是 Zoom 通用营销页 | 录制为 `accessLevel=meeting`，无登录 cookie | 先在 Chrome 登录该租户，再用 `--from-browser chrome` |
+| `html_to_pdf` 报 Chromium revision 不存在 | npx 缓存的 Playwright 与本地 Chromium 版本不一致 | 已自动回退到任一可用 Chromium；或 `npx playwright install chromium` |
+| LibreOffice `DeploymentException` | 应用目录损坏（`program/` 为空） | `--lo-app` 指向健康副本，或 `--dmg` 挂载 |
+| 图片在 PDF 里显示为方框 | 字体栈缺 emoji | 已修（`md_to_html` 补 emoji 回退） |
+
+## 10. 目录结构与许可
 
 ```text
 lecture-to-exam/
@@ -286,13 +319,20 @@ lecture-to-exam/
 │   ├── mode-b.md                # Mode B 分步流程
 │   ├── transcript-spec.md       # 转录稿契约
 │   ├── knowledge-spec.md        # 单讲讲义格式（四行块 + 原图）
-│   └── review-spec.md           # 复习手册格式（五行块 + 纯文字）
+│   ├── review-spec.md           # 复习手册格式（五行块 + 纯文字）
+│   ├── device-setup.md          # ★ 实测环境与复现步骤
+│   └── mode-c.md                # ★ 在既有框架文档上增补
 ├── scripts/
 │   ├── run.py                   # ★ 统一入口（定位 skill 根 / 选解释器 / 转发退出码）
 │   ├── _common.py               # 跨平台环境探测
 │   ├── check_env.py             # 只读自检（--json）
 │   ├── verify_output.py         # ★ 可执行格式闸门
-│   └── …                        # 转录、抓音、取字、出图、md→pdf
+│   ├── zoom_transcript.py       # share 链接：官方转录
+│   ├── zoom_transcript_play.py  # /rec/play/ 链接：浏览器 + VTT
+│   ├── match_decks.py           # 录音↔课件匹配建议
+│   ├── make_cheatsheet.py       # 一页 A4 速查
+│   ├── fetch_webpage_text.py    # JS 页面取正文
+│   └── …                        # 抓音、取字、出图、md→pdf
 ├── examples/                    # 离线烟雾测试样例
 ├── tests/                       # 32 项离线测试（缺依赖自动 SKIP）
 │   └── run_tests.py
